@@ -1,4 +1,4 @@
-const { MalList, MalVector, MalHashmap, MalSymbol } = require("./types");
+const { MalList, MalVector, MalHashmap, MalSymbol, MalString } = require("./types");
 
 class Reader {
     #tokens
@@ -44,11 +44,16 @@ const read_list = (reader) => new MalList(read_seq(reader, ')'))
 const read_vector = (reader) => new MalVector(read_seq(reader, ']'))
 const read_hashmap = (reader) => new MalHashmap(read_seq(reader, '}'))
 
+
 const read_atom = reader => {
     const token = reader.next();
     
     if (token.match(/^[+-]?[0-9]+$/)) {
       return parseInt(token);
+    }
+
+    if(result = token.match(/"([^"]*)"$/)) {
+      return new MalString(result[1]);
     }
 
     return new MalSymbol(token);

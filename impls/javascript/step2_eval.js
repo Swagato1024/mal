@@ -3,7 +3,7 @@ const { stdin: input, stdout: output } = require('node:process');
 
 const printer = require('./printer');
 const reader = require('./reader');
-const { MalSymbol, MalList, MalVector, MalHashmap } = require('./types');
+const { MalSymbol, MalList, MalVector, MalHashmap, MalString } = require('./types');
 
 const rl = readline.createInterface({ input, output });
 
@@ -30,6 +30,11 @@ const eval_ast = (ast, env) => {
         const value = ast.value.map(x => EVAL(x, env));
         return new MalVector(value);
      }
+
+     if(ast instanceof MalHashmap) {
+        const value = ast.value.map(x => EVAL(x, env));
+        return new MalHashmap(value);
+     }
    
     return ast;
 }
@@ -44,6 +49,7 @@ const EVAL = (ast, env) => {
 
     return eval_ast(ast, repl_env);
 }
+
 const PRINT = str => printer.pr_str(str)
 
 const rep = (str, env) => PRINT(EVAL(READ(str)), env)
