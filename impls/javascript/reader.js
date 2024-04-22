@@ -1,19 +1,23 @@
 const { log } = require("console");
 
-const reader = (tokens) => {
-    let position = 0;
+class Reader {
+    #tokens
+    #position
 
-    const next = () => {
-        const token =  tokens[position];
-        position += 1;
+    constructor(tokens) {
+        this.#tokens = tokens;
+        this.#position = 0;
+    }
+
+    next() {
+        const token =  this.#tokens[this.#position];
+        this.#position += 1;
         return token;
     }
 
-    const peek = () => {
-        tokens[position];
-    };
-
-    return { next, peek };
+    peek() {
+        return this.#tokens[this.#position];
+    }
 }
 
 const tokenize = (sourceCode) => {
@@ -21,20 +25,18 @@ const tokenize = (sourceCode) => {
     return [...sourceCode.matchAll(re)].map((x) => x[1]).slice(0, -1);
 }; 
 
-log(tokenize("(  + 2   (*  3  4)  )"));
-
 const read_seq = (reader, closingSymbol) => {
     const ast = [];
   
     while(reader.peek() != closingSymbol) {
-      ast.push(readForm(reader));
+      ast.push(read_form(reader));
     }
   
     reader.next();
     return ast;
   }; 
 
-const read_list = (reader) => read_seq(reader, ')');
+const read_list = (reader) => read_seq(reader, ')')
 
 const read_atom = reader => {
     const token = reader.next();
@@ -43,15 +45,23 @@ const read_atom = reader => {
       return parseInt(token);
     }
 
-    if(token.match(/^"[^"]*"$/)) {
-        log("string");
-      return token.slice(1,token.length-1);
-    }
+    return token;
   };
 
-const read_form = reader =>
-      ((reader.peek() === '(') ? read_list : read_atom)(reader);
+  const read_form = reader => {
+    const token = reader.peek();
 
-const readStr = (expStr) => 
-    read_form(reader(tokenize(expStr)));
+    switch (token) {
+      case '(' :
+        reader.next();
+        return read_list(reader);
+      default :
+        return read_atom(reader);
+    }
+  }; 
 
+const readStr = (expStr) => {
+    const tokens = tokenize(expStr);
+    const reader = new Reader(tokens);
+    return read_form(reader);
+}
