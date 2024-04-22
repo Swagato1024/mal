@@ -1,4 +1,5 @@
 const { log } = require("console");
+const { MalList, MalVector } = require("./types");
 
 class Reader {
     #tokens
@@ -27,8 +28,12 @@ const tokenize = (sourceCode) => {
 
 const read_seq = (reader, closingSymbol) => {
     const ast = [];
-  
+    
     while(reader.peek() != closingSymbol) {
+        if(reader.peek() === undefined) {
+            throw 'unbalanced';
+        }
+
       ast.push(read_form(reader));
     }
   
@@ -36,11 +41,12 @@ const read_seq = (reader, closingSymbol) => {
     return ast;
   }; 
 
-const read_list = (reader) => read_seq(reader, ')')
+const read_list = (reader) => new MalList(read_seq(reader, ')'))
+const read_vector = (reader) => new MalVector(read_seq(reader, ']'))
 
 const read_atom = reader => {
     const token = reader.next();
-
+    
     if (token.match(/^[+-]?[0-9]+$/)) {
       return parseInt(token);
     }
@@ -55,13 +61,21 @@ const read_atom = reader => {
       case '(' :
         reader.next();
         return read_list(reader);
+
+      case '[' :
+        reader.next();
+        return read_vector(reader); 
+
       default :
         return read_atom(reader);
     }
   }; 
 
-const readStr = (expStr) => {
+const read_str = (expStr) => {
     const tokens = tokenize(expStr);
     const reader = new Reader(tokens);
     return read_form(reader);
 }
+
+
+module.exports = {read_str};
