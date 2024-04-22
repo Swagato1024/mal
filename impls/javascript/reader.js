@@ -1,4 +1,4 @@
-const { MalList, MalVector, MalHashmap, MalSymbol, MalString } = require("./types");
+const { MalList, MalVector, MalHashmap, MalSymbol, MalString, MalKeyword } = require("./types");
 
 class Reader {
     #tokens
@@ -52,8 +52,20 @@ const read_atom = reader => {
       return parseInt(token);
     }
 
-    if(result = token.match(/"([^"]*)"$/)) {
-      return new MalString(result[1]);
+    if(token.match(/^"(?:\\.|[^\\"])*"$/)) {
+      return new MalString(token.slice(1, -1));
+    }
+
+    if (token === 'true') {
+      return true;
+    }
+
+    if (token === 'false') {
+      return false;
+    }
+
+    if(token[0] === ':') {
+      return new MalKeyword(token.slice(1));
     }
 
     return new MalSymbol(token);
@@ -74,6 +86,10 @@ const read_atom = reader => {
      case '{' :
         reader.next();
         return read_hashmap(reader); 
+
+    case ')':
+    case ']':
+    case '}': throw 'unbalanced'    
 
       default :
         return read_atom(reader);
