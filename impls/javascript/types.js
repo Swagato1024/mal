@@ -32,6 +32,12 @@ class MalList extends MalValue {
     }
 }
 
+class MalSymbol extends MalValue {
+    constructor(value) {
+        super(value)
+    }
+}
+
 class MalHashmap extends MalValue {
     constructor(value) {
         super(value);
@@ -46,4 +52,4 @@ class MalHashmap extends MalValue {
 
 const toString = (x) => (x instanceof MalValue) ? x.pr_str() : x
 
-module.exports = { MalValue, MalList, MalVector, MalHashmap }
+module.exports = { MalValue, MalList, MalVector, MalHashmap, MalSymbol }

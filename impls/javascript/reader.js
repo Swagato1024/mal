@@ -1,4 +1,4 @@
-const { MalList, MalVector, MalHashmap } = require("./types");
+const { MalList, MalVector, MalHashmap, MalSymbol } = require("./types");
 
 class Reader {
     #tokens
@@ -51,7 +51,7 @@ const read_atom = reader => {
       return parseInt(token);
     }
 
-    return token;
+    return new MalSymbol(token);
   };
 
   const read_form = reader => {
