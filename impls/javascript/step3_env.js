@@ -4,7 +4,7 @@ const { stdin: input, stdout: output } = require('node:process');
 
 const printer = require('./printer');
 const reader = require('./reader');
-const { MalSymbol, MalList, MalVector, MalHashmap, MalString } = require('./types');
+const { MalSymbol, MalList, MalVector, MalHashmap, MalString, MalNil } = require('./types');
 const { Env } = require('./env');
 
 const rl = readline.createInterface({ input, output });
@@ -51,7 +51,7 @@ const handleLet = ([_, bindings, exprs], env) => {
         newEnv.set(symbol, EVAL(exp, newEnv))
     );
 
-   return exprs ? EVAL(exprs, newEnv) : nil;
+   return exprs ? EVAL(exprs, newEnv) : new MalNil();
 }
 
 const EVAL = (ast, env) => {

@@ -74,6 +74,16 @@ class MalKeyword extends MalValue {
     }
 }
 
+class MalNil extends MalValue {
+    constructor() {
+        super(null)
+    }
+
+    pr_str() {
+        return 'nil'
+    }
+}
+
 const toString = (x) => (x instanceof MalValue) ? x.pr_str() : x
 
-module.exports = { MalValue, MalList, MalVector, MalHashmap, MalSymbol, MalString, MalKeyword }
+module.exports = { MalValue, MalList, MalVector, MalHashmap, MalSymbol, MalString, MalKeyword, MalNil }
