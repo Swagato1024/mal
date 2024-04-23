@@ -38,7 +38,7 @@ env.set(new MalSymbol('-'), (...args) => args.reduce((a,b) => a - b),);
 env.set(new MalSymbol('*'), (...args) => args.reduce((a,b) => a * b),);
 env.set(new MalSymbol('/'), (...args) => args.reduce((a,b) => a / b),);
 
-const handleDef = ([symbol, key, exp], env) => {
+const handleDef = ([symbol, key, exp]) => {
     env.set(key, EVAL(exp, env));
     return env.get(key);
 }
@@ -57,10 +57,9 @@ const handleLet = ([_, bindings, exprs], env) => {
 const EVAL = (ast, env) => {
     if(!(ast instanceof MalList)) return eval_ast(ast, env);
     if(ast.isEmpty()) return ast;
-    
-    const firstItem = ast.value[0].value;
-    switch(firstItem) {
-        case 'def!' : return handleDef(ast.value, env);
+
+    switch(ast.value[0].value) {
+        case 'def!' : return handleDef(ast.value);
         case 'let*' : return handleLet(ast.value, env);
         default :
           const [fn, ...args] = eval_ast(ast, env).value;
