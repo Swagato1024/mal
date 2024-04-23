@@ -7,7 +7,6 @@ class Env {
 
     set(symbol, malValue) {
         this.data[symbol.value] = malValue;
-        console.log(this.data);
     }
 
     find(symbol) {
