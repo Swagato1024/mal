@@ -77,7 +77,7 @@ const EVAL = (ast, env) => {
         case 'def!' : return handleDef(ast.value);
         case 'let*' : return handleLet(ast.value, env);
         case 'if'   : return handleIf(ast.value, env);
-        case 'do'   : return handleDo(ast.value, env)
+        case 'do'   : return handleDo(ast.value, env);
         default :
           const [fn, ...args] = eval_ast(ast, env).value;
           return fn(...args);
