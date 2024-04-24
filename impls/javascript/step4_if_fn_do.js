@@ -57,29 +57,36 @@ const handleLet = ([_, bindings, exprs], env) => {
 const handleIf = (ifParams, env) => {
     if(ifParams.length < 3) throw 'Too few arguments to if';
     const [, test, then, otherwise] = ifParams;
-
    return EVAL(test) ?  EVAL(then, env) : EVAL(otherwise, env);
 }
 
 const handleDo = ([, ...exprs], env) => {
-    const  [lastExpEvaluatedTo] = exprs
+    const [lastExpEvaluatedTo] = exprs
     .map(x => EVAL(x, env))
     .slice(-1);
 
     return lastExpEvaluatedTo;
-  }
+}
+
+const handleFn = ([, bindings, exprs], env) => {
+    return (...args) => {
+        const newEnv = new Env(env, bindings.value, args);
+        return EVAL(exprs, newEnv);
+    }
+}  
   
 const EVAL = (ast, env) => {
     if(!(ast instanceof MalList)) return eval_ast(ast, env);
-    if(ast.isEmpty()) return ast;
 
     switch(ast.value[0].value) {
         case 'def!' : return handleDef(ast.value);
         case 'let*' : return handleLet(ast.value, env);
         case 'if'   : return handleIf(ast.value, env);
         case 'do'   : return handleDo(ast.value, env);
+        case 'fn*'  : return handleFn(ast.value, env);
         default :
           const [fn, ...args] = eval_ast(ast, env).value;
+          console.log(fn, args);
           return fn(...args);
     }
 }
@@ -101,4 +108,6 @@ const repl = () => {
     });
 }
 
-repl();
+// repl();
+
+console.log(eval_ast(new MalNil()), env);
