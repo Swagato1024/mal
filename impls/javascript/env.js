@@ -9,7 +9,7 @@ class Env {
     }
 
     #bindExprs(binds, exprs) {
-        let index=0;
+        let index = 0;
         while(index < binds.length && binds[index].value !== '&') {
           this.set(binds[index], exprs[index]);
           index++;

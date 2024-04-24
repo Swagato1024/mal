@@ -80,10 +80,33 @@ class MalNil extends MalValue {
     }
 
     pr_str() {
-        return 'nil'
+        return 'nil';
+    }
+}
+
+class MalFn extends MalValue {
+    constructor(fnBody, params, env, fn) {
+        super(fn)
+        this.fnBody = fnBody
+        this.params = params;
+        this.env = env;
+    }
+
+    pr_str() {
+        return '#<function>';
     }
 }
 
 const toString = (x) => (x instanceof MalValue) ? x.pr_str() : x
 
-module.exports = { MalValue, MalList, MalVector, MalHashmap, MalSymbol, MalString, MalKeyword, MalNil }
+module.exports = { 
+    MalValue,
+    MalList,
+    MalVector,
+    MalHashmap,
+    MalSymbol,
+    MalString,
+    MalKeyword,
+    MalNil,
+    MalFn
+ }
