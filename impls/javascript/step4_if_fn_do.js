@@ -61,6 +61,14 @@ const handleIf = (ifParams, env) => {
    return EVAL(test) ?  EVAL(then, env) : EVAL(otherwise, env);
 }
 
+const handleDo = ([, ...exprs], env) => {
+    const  [lastExpEvaluatedTo] = exprs
+    .map(x => EVAL(x, env))
+    .slice(-1);
+
+    return lastExpEvaluatedTo;
+  }
+  
 const EVAL = (ast, env) => {
     if(!(ast instanceof MalList)) return eval_ast(ast, env);
     if(ast.isEmpty()) return ast;
@@ -69,6 +77,7 @@ const EVAL = (ast, env) => {
         case 'def!' : return handleDef(ast.value);
         case 'let*' : return handleLet(ast.value, env);
         case 'if'   : return handleIf(ast.value, env);
+        case 'do'   : return handleDo(ast.value, env)
         default :
           const [fn, ...args] = eval_ast(ast, env).value;
           return fn(...args);
