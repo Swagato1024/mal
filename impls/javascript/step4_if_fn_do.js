@@ -6,6 +6,7 @@ const printer = require('./printer');
 const reader = require('./reader');
 const { MalSymbol, MalList, MalVector, MalHashmap, MalString, MalNil } = require('./types');
 const { Env } = require('./env');
+const { ns } = require('./core');
 
 const rl = readline.createInterface({ input, output });
 
@@ -33,10 +34,9 @@ const eval_ast = (ast, env) => {
 }
 
 const env = new Env();
-env.set(new MalSymbol('+'), (...args) => args.reduce((a,b) => a + b));
-env.set(new MalSymbol('-'), (...args) => args.reduce((a,b) => a - b),);
-env.set(new MalSymbol('*'), (...args) => args.reduce((a,b) => a * b),);
-env.set(new MalSymbol('/'), (...args) => args.reduce((a,b) => a / b),);
+Object.entries(ns).forEach(([key, value]) => {
+    env.set(new MalSymbol(key), value);
+});
 
 const handleDef = ([symbol, key, exp]) => {
     env.set(key, EVAL(exp, env));
@@ -57,7 +57,7 @@ const handleLet = ([_, bindings, exprs], env) => {
 const handleIf = (ifParams, env) => {
     if(ifParams.length < 3) throw 'Too few arguments to if';
     const [, test, then, otherwise] = ifParams;
-   return EVAL(test) ?  EVAL(then, env) : EVAL(otherwise, env);
+   return EVAL(test, env) ?  EVAL(then, env) : EVAL(otherwise, env);
 }
 
 const handleDo = ([, ...exprs], env) => {
@@ -86,8 +86,8 @@ const EVAL = (ast, env) => {
         case 'fn*'  : return handleFn(ast.value, env);
         default :
           const [fn, ...args] = eval_ast(ast, env).value;
-          console.log(fn, args);
-          return fn(...args);
+          if(fn instanceof Function) return fn(...args);
+          throw 'First param should be fn'
     }
 }
 
@@ -108,6 +108,4 @@ const repl = () => {
     });
 }
 
-// repl();
-
-console.log(eval_ast(new MalNil()), env);
+repl();
