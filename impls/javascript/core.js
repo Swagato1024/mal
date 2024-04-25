@@ -1,5 +1,6 @@
 const { isEqual } = require("lodash");
 const { MalNil, MalList } = require("./types");
+const reader = require('./reader');
 
 const ns = {
     '+' : (...args) => args.reduce((a,b) => a + b),
@@ -21,6 +22,7 @@ const ns = {
     '<=' : (a, b) => a <= b,
     '>=' : (...args) =>  a >= b,
     'not' : (a) => !(a),
+    'read-string' : str => reader.read_str(str.value)
 }
 
 module.exports = {ns};
