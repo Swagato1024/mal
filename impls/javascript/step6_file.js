@@ -9,7 +9,11 @@ const { MalSymbol, MalList, MalVector, MalHashmap, MalString, MalNil, MalFn } = 
 const { Env } = require('./env');
 const { ns } = require('./core');
 
+const READ = str => reader.read_str(str);
+const PRINT = str => printer.pr_str(str)
+
 const rl = readline.createInterface({ input, output });
+const rep = (str, env) => PRINT(EVAL(READ(str), env))
 
 const createReplEnv = (env) => {
     Object.entries(ns).forEach(([key, value]) => {
@@ -17,6 +21,7 @@ const createReplEnv = (env) => {
     });  
 
     env.set(new MalSymbol('eval'), (ast) => EVAL(ast, env));
+    rep('(def! load-file (fn* (f) (eval (read-string (str "(do " (slurp f) "\nnil)")))))', env)
   };
 
 const eval_ast = (ast, env) => {
@@ -41,7 +46,6 @@ const eval_ast = (ast, env) => {
 }
 
 const env = new Env();
-createReplEnv(env);
 
 const handleDef = ([, key, exp]) => {
     env.set(key, EVAL(exp, env));
@@ -74,17 +78,21 @@ const handleDo = ([, ...exprs], env) => {
     return lastExpEvaluatedTo;
 }
 
-const handleFn = ([, params, fnBody], env) => new MalFn(fnBody, params, env);
+const handleFn = ([, params, fnBody], env) => {
+    const fn = (...args) => 
+        EVAL(fnBody, new Env(env, params.value, args));
+
+   return new MalFn(fnBody, params, env, fn)
+};
   
 const EVAL = (ast, env) => {
     while(true) {
-
     if(!(ast instanceof MalList)) return eval_ast(ast, env);
 
     switch(ast.value[0].value) {
         case "def!" : return handleDef(ast.value);
-        case "let*" : return handleLet(ast, env);
-        case "do" : return handleDo(ast, env);
+        case "let*" : return handleLet(ast.value, env);
+        case "do" : return handleDo(ast.value, env);
         case "if" : 
          ast = handleIf(ast.value, env);
          break;
@@ -103,10 +111,7 @@ const EVAL = (ast, env) => {
     }
 }
 
-const READ = str => reader.read_str(str);
-const PRINT = str => printer.pr_str(str)
-
-const rep = (str, env) => PRINT(EVAL(READ(str), env))
+createReplEnv(env);
 
 const repl = () => {
     rl.question('user> ', (input) => {

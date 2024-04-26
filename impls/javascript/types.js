@@ -60,7 +60,7 @@ class MalString extends MalValue {
     }
 
     pr_str() {
-        return `"${this.value}"`
+        return `${this.value}`
     }
 }
 
@@ -86,14 +86,43 @@ class MalNil extends MalValue {
 
 class MalFn extends MalValue {
     constructor(fnBody, params, env, fn) {
-        super(fn)
+        super(fnBody)
         this.fnBody = fnBody
         this.params = params;
         this.env = env;
+        this.fn = fn;
     }
 
     pr_str() {
         return '#<function>';
+    }
+
+    apply (context, args) {
+       return this.fn.apply(context, args);
+    }
+}
+
+class MalAtom extends MalValue {
+    constructor(value) {
+      super(value);
+    }
+  
+    pr_str() {
+      return "(atom " + this.value + ")";
+    }
+  
+    deref() {
+      return this.value;
+    }
+  
+    reset(value) {
+      this.value = value;
+      return this.value;
+    }
+  
+    swap(f, ...args) {
+     this.value = f.apply(null, [this.value, ...args]);
+     return this.value;
     }
 }
 
@@ -108,5 +137,6 @@ module.exports = {
     MalString,
     MalKeyword,
     MalNil,
-    MalFn
+    MalFn,
+    MalAtom
  }

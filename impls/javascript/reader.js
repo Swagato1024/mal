@@ -25,6 +25,8 @@ const tokenize = (sourceCode) => {
     return [...sourceCode.matchAll(re)].map((x) => x[1]).slice(0, -1);
 }; 
 
+const removeComments = tokens => tokens.filter(token => !(token.startsWith(";")))
+
 const read_seq = (reader, closingSymbol) => {
     const ast = [];
     
@@ -54,6 +56,10 @@ const read_atom = reader => {
 
     if(token.match(/^"(?:\\.|[^\\"])*"$/)) {
       return new MalString(token.slice(1, -1));
+    }
+
+    if(token.startsWith(";")) {
+      return new MalString(token.slice(2));
     }
 
     if (token === 'true') {
@@ -102,7 +108,7 @@ const read_atom = reader => {
 
 const read_str = (expStr) => {
     const tokens = tokenize(expStr);
-    const reader = new Reader(tokens);
+    const reader = new Reader(removeComments(tokens));
     return read_form(reader);
 }
 
