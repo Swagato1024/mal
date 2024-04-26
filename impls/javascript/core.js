@@ -33,7 +33,9 @@ const ns = {
     'swap!' : (atom, f, ...args) => atom instanceof MalAtom && atom.swap(f, ...args),
     'atom' : (value) => new MalAtom(value),
     'deref' : (value) => value instanceof MalAtom && value.deref(),
-    'reset!' : (symbol, resetTo) => symbol instanceof MalAtom && symbol.reset(resetTo)
+    'reset!' : (symbol, resetTo) => symbol instanceof MalAtom && symbol.reset(resetTo),
+    'cons': (value, list) => new MalList([value, ...list.value]),
+    'concat': (...lists) => new MalList(lists.flatMap(x => x.value)),
 }
 
 module.exports = {ns};

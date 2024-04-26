@@ -97,6 +97,7 @@ const EVAL = (ast, env) => {
          ast = handleIf(ast.value, env);
          break;
         case "fn*" : return handleFn(ast.value, env);
+        case "quote" : return ast.value[1];
         default:
           const [fn, ...args] = eval_ast(ast, env).value;
 
