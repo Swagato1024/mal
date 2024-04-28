@@ -11,10 +11,10 @@ const { ns } = require('./core');
 const { log } = require('node:console');
 
 const READ = str => reader.read_str(str);
-const PRINT = str => printer.pr_str(str)
+const PRINT = str => printer.pr_str(str);
 
 const rl = readline.createInterface({ input, output });
-const rep = (str, env) => PRINT(EVAL(READ(str), env))
+const rep = (str, env) => PRINT(EVAL(READ(str), env));
 
 const createReplEnv = (env) => {
     Object.entries(ns).forEach(([key, value]) => {
@@ -22,12 +22,11 @@ const createReplEnv = (env) => {
     });  
 
     env.set(new MalSymbol('eval'), (ast) => EVAL(ast, env));
-    rep('(def! load-file (fn* (f) (eval (read-string (str "(do " (slurp f) "\nnil)")))))', env)
+    rep('(def! load-file (fn* (f) (eval (read-string (str "(do " (slurp f) "\nnil)")))))', env);
   };
 
 const eval_ast = (ast, env) => {
-
-    if(ast instanceof MalSymbol) return env.get(ast)
+    if(ast instanceof MalSymbol) return env.get(ast);
     
     if(ast instanceof MalList) {
         const value = ast.value.map(x => EVAL(x, env));
@@ -72,6 +71,7 @@ const handleIf = (ifClause, env) => {
     return EVAL(test, env) ? then : otherwise;
 }
 
+// TODO: use eval_ast 
 const handleDo = ([, ...exprs], env) => {
     const [lastExpEvaluatedTo] = exprs
     .map(x => EVAL(x, env))
@@ -80,6 +80,7 @@ const handleDo = ([, ...exprs], env) => {
     return lastExpEvaluatedTo;
 }
 
+//TODO: wrap fn body with do
 const handleFn = ([, params, fnBody], env) => {
     const fn = (...args) => 
         EVAL(fnBody, new Env(env, params.value, args));
@@ -113,11 +114,11 @@ const quasiquote = (ast) => {
         }
 
         if(e.value && e.value[0]?.value === 'unquote') {
-            result = new MalList([new MalSymbol('cons'), e.value[1], result])
+            result = new MalList([new MalSymbol('cons'), e.value[1], result]);
         }
 
         else if(e.value && e.value[0]?.value === 'splice-unquote') {
-            result = new MalList([new MalSymbol('concat'), e.value[1], result])
+            result = new MalList([new MalSymbol('concat'), e.value[1], result]);
         }
         
         else if((e instanceof Seq)) {
