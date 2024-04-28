@@ -1,10 +1,8 @@
 const { readFileSync } = require("fs");
 const { isEqual } = require("lodash");
-const { MalNil, MalList, MalString, MalAtom } = require("./types");
+const { MalNil, MalList, MalString, MalAtom, MalValue, MalVector } = require("./types");
 const reader = require('./reader');
 const printer = require('./printer');
-
-
 const str = (...args) => new MalString(args.map(x => x.value).join(''))
 
 const ns = {
@@ -15,7 +13,6 @@ const ns = {
     '=' : (a, b) => isEqual(a, b),
     'prn' : (...args) => {
         const output = args.map(x => x.value? `"${x.value}"` : x);
-        console.log(...output);
         return new MalNil();
       },
     'list' : (...args) => new MalList(args),
@@ -34,8 +31,11 @@ const ns = {
     'atom' : (value) => new MalAtom(value),
     'deref' : (value) => value instanceof MalAtom && value.deref(),
     'reset!' : (symbol, resetTo) => symbol instanceof MalAtom && symbol.reset(resetTo),
-    'cons': (value, list) => new MalList([value, ...list.value]),
-    'concat': (...lists) => new MalList(lists.flatMap(x => x.value)),
+    'cons': (value, list) =>  new MalList([value, ...list.value]),
+    'concat': (...lists) => {
+      return new MalList(lists.flatMap(x => x instanceof MalValue ? x.value : x))
+    },
+    'vec': (list) => new MalVector(list.value),
 }
 
 module.exports = {ns};
