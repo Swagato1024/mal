@@ -65,10 +65,10 @@ const handleLet = ([astValue, bindings, exprs], env) => {
    return exprs ? EVAL(exprs, letEnv) : new MalNil();
 }
 
-const handleIf = (ifParams, env) => {
-    if(ifParams.length < 3) throw 'Too few arguments to if';
+const handleIf = (ifClause, env) => {
+    if(ifClause.length < 3) throw 'Too few arguments to if';
 
-    const [, test, then, otherwise] = ifParams;
+    const [, test, then, otherwise] = ifClause;
     return EVAL(test, env) ? then : otherwise;
 }
 
@@ -86,22 +86,23 @@ const handleFn = ([, params, fnBody], env) => {
 
    return new MalFn(fnBody, params, env, fn)
 };
-const quote = (x) => {
-    return new MalList([new MalSymbol('quote'), x])
-}
 
-const quasiquote = ([, x], env) => {
+const quote = (x) => new MalList([new MalSymbol('quote'), x])
+
+
+const quasiquote = (ast) => {
     let result = new MalList();
+    console.log({ast});
 
-    if(!(x instanceof MalValue) || x instanceof MalNil ) return x;
+    if(!(ast instanceof MalValue) || ast instanceof MalNil ) return ast;
 
-    if(!(x instanceof Seq)) return new MalList([new MalSymbol('quote'), x]);
+    if(!(ast instanceof Seq)) return new MalList([new MalSymbol('quote'), ast]);
 
-    if(x.value.length === 2 && x.value[0]?.value === 'unquote') return x.value[1]; 
+    if(ast.value.length === 2 && ast.value[0]?.value === 'unquote') return ast.value[1]; 
 
-      const reverseList =  x.value
+      const reverseList =  ast.value
         .slice()
-        .reverse()
+        .reverse();
 
 
 // TODO:  Reduce 
@@ -120,22 +121,21 @@ const quasiquote = ([, x], env) => {
         }
         
         else if((e instanceof Seq)) {
-             const abc = new Seq([new MalSymbol('cons'), e, result]);
              result =  e instanceof MalVector ?
               new Seq([new MalSymbol('cons'), new Seq([new MalSymbol("vec"), new Seq(e.value)]), result]) 
-              : abc;
+              : new Seq([new MalSymbol('cons'), e, result]);
         }
+
         else{  
             result =  new MalList([new MalSymbol('cons'), quote(e), result]);
         }
      }
 
-    return x instanceof MalVector ?  new Seq([new MalSymbol("vec"), result]) : result;
+    return ast instanceof MalVector ?  new Seq([new MalSymbol("vec"), result]) : result;
 
 }
   
 const EVAL = (ast, env) => {
-    // console.log({ast})
     while(true) {
     if(ast instanceof MalVector) return eval_ast(ast, env);
     if(!(ast instanceof Seq)) return eval_ast(ast, env);
@@ -154,11 +154,11 @@ const EVAL = (ast, env) => {
             return ast.value[1]
         };
         case "quasiquote" : {
-            ast = quasiquote(ast.value, env);
+            ast = quasiquote(ast.value[1]);
             break;
         };
         case 'quasiquoteexpand':
-            return quasiquote(ast.value);
+            return quasiquote(ast.value[1]);
         default:
           const [fn, ...args] = eval_ast(ast, env).value;
           if(fn instanceof MalFn) {
